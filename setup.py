@@ -4,25 +4,23 @@
 # Note: To use the 'upload' functionality of this file, you must:
 #   $ pipenv install twine --dev
 
-import io
-import os
-import sys
+import io, os, sys
 from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = "torchaudio-augmentations"
-DESCRIPTION = "Audio augmentations library for PyTorch, for audio in the time-domain."
+NAME = "ecg-augmentations"
+DESCRIPTION = "ECG time-series augmentations library for PyTorch"
 URL = "https://github.com/spijkervet/torchaudio-augmentations"
-EMAIL = "janne.spijkervet@gmail.com"
-AUTHOR = "Janne Spijkervet"
-REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.2.4"
+EMAIL = "k.avramidis@windowslive.com"
+AUTHOR = "Kleanthis Avramidis"
+REQUIRES_PYTHON = ">=3.9.0"
+VERSION = "0.1.0"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy", "torch", "torchaudio", "julius", "wavaugment", "torch-pitch-shift"]
-TEST_REQUIRED = ["pytest", "pytest-cov", "black", "librosa"]
+REQUIRED = ["numpy", "torch", "torchaudio", "julius", "wavaugment"]
+TEST_REQUIRED = ["pytest", "pytest-cov", "black"]
 
 # What packages are optional?
 EXTRAS = {
@@ -119,7 +117,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],

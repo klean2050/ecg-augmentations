@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = torchaudio_augmentations
+source = ecg_augmentations
 
 [report]
 exclude_lines =
