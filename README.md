@@ -6,11 +6,11 @@ ECG time-series augmentations library for PyTorch. The focus of this repo is to:
 - Make every transformation differentiable through `nn.Module`.
 - Optimise ECG transformations for CPU and GPU devices.
 
-This repo supports stochastic transformations as used often in self-supervised and semi-supervised learning methods. One can apply a single stochastic augmentation or create as many stochastically transformed ECG examples from a single interface. This package follows the conventions set out by `torchaudio-augmentations`, with an ECG sample defined as a tensor of `[lead, time]`, or a batched representation `[batch, lead, time]`. Each individual augmentation can be initialized on its own, or be wrapped around a `RandomApply` interface which will apply the augmentation with probability `p`. **Note**: Current version has been solely tested on single-lead ECG samples.
+This repo supports stochastic transformations as used often in self-supervised and semi-supervised learning methods. One can apply a single stochastic augmentation or create as many stochastically transformed ECG examples from a single interface. This package follows the conventions set out by `torchaudio-augmentations`, with an ECG sample defined as a tensor of `[lead, time]`, or a batched representation `[batch, lead, time]`. Each individual augmentation can be initialized on its own, or be wrapped around a `RandomApply` interface which will apply the augmentation with probability `p`. **Note**: Current version has been tested on single-lead ECG.
 
 ## Usage
 
-One can define a single or several augmentations, which are applied sequentially to an ECG sample.
+One can define a single or several augmentations, which are applied sequentially to an ECG sample:
 
 ```python
 from ecg_augmentations import *
@@ -37,12 +37,15 @@ transforms = [
 ]
 ```
 
-We can return either one or many versions of the same audio example:
+We can return either one ...
+
 ```python
 transform = Compose(transforms=transforms)
 transformed_ecg =  transform(ecg)
 >> transformed_ecg.shape = [num_leads, num_samples]
 ```
+
+... or many versions of the same example:
 
 ```python
 transform = ComposeMany(transforms=transforms, num_augmented_samples=2)
