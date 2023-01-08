@@ -2,14 +2,15 @@ import torch
 
 
 class Compose:
-    """Data augmentation module that transforms any given data example with a chain of audio augmentations."""
+    """
+    Data augmentation module that transforms any given data example with a chain of augmentations.
+    """
 
     def __init__(self, transforms):
         self.transforms = transforms
 
     def __call__(self, x):
-        x = self.transform(x)
-        return x
+        return self.transform(x)
 
     def __repr__(self):
         format_string = self.__class__.__name__ + "("
@@ -27,8 +28,8 @@ class Compose:
 
 class ComposeMany(Compose):
     """
-    Data augmentation module that transforms any given data example randomly
-    resulting in N correlated views of the same example
+    Data augmentation module that transforms any given data example,
+    randomly resulting in N correlated views of the same example.
     """
 
     def __init__(self, transforms, num_augmented_samples):

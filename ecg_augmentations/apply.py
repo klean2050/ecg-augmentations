@@ -34,7 +34,7 @@ import torch
 class RandomApply(torch.nn.Module):
     """Apply randomly a list of transformations with a given probability.
 
-    .. note::
+    Note:
         In order to script the transformation, please use ``torch.nn.ModuleList`` as input instead of list/tuple of
         transforms as shown below:
 

@@ -1,5 +1,4 @@
-import random
-import torch
+import random, torch
 
 
 class RandomResizedCrop(torch.nn.Module):
@@ -7,8 +6,7 @@ class RandomResizedCrop(torch.nn.Module):
         super().__init__()
         self.n_samples = n_samples
 
-    def forward(self, audio):
-        max_samples = audio.shape[-1]
+    def forward(self, x):
+        max_samples = x.shape[-1]
         start_idx = random.randint(0, max_samples - self.n_samples)
-        audio = audio[..., start_idx : start_idx + self.n_samples]
-        return audio
+        return x[..., start_idx : start_idx + self.n_samples]

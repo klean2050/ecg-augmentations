@@ -12,7 +12,7 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = "ecg-augmentations"
 DESCRIPTION = "ECG time-series augmentations library for PyTorch"
-URL = "https://github.com/spijkervet/torchaudio-augmentations"
+URL = "https://github.com/klean2050/ecg-augmentations"
 EMAIL = "k.avramidis@windowslive.com"
 AUTHOR = "Kleanthis Avramidis"
 REQUIRES_PYTHON = ">=3.9.0"

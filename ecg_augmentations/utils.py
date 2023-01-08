@@ -1,15 +1,13 @@
 import torch
 
 
-def tensor_has_valid_audio_batch_dimension(tensor: torch.Tensor) -> torch.Tensor:
-    if tensor.ndim == 3:
-        return True
-    return False
+def has_valid_batch_dim(tensor: torch.Tensor) -> torch.Tensor:
+    return True if tensor.ndim == 3 else False
 
 
-def add_audio_batch_dimension(tensor: torch.Tensor) -> torch.Tensor:
+def add_batch_dim(tensor: torch.Tensor) -> torch.Tensor:
     return tensor.unsqueeze(dim=0)
 
 
-def remove_audio_batch_dimension(tensor: torch.Tensor) -> torch.Tensor:
+def remove_batch_dim(tensor: torch.Tensor) -> torch.Tensor:
     return tensor.squeeze(dim=0)
