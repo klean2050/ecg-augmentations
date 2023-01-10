@@ -1,53 +1,48 @@
-import pytest
-import torch
-from torchaudio_augmentations.utils import (
-    add_audio_batch_dimension,
-    remove_audio_batch_dimension,
-    tensor_has_valid_audio_batch_dimension,
-)
+import pytest, torch
+from ecg_augmentations.utils import *
 
 
 @pytest.mark.parametrize(
     "tensor,expected_value",
     [
         (torch.zeros(1), False),
-        (torch.zeros(1, 48000), False),
-        (torch.zeros(16, 48000), False),
-        (torch.zeros(1, 1, 48000), True),
-        (torch.zeros(16, 1, 48000), True),
+        (torch.zeros(1, 1000), False),
+        (torch.zeros(16, 1000), False),
+        (torch.zeros(1, 1, 1000), True),
+        (torch.zeros(16, 1, 1000), True),
     ],
 )
-def test_tensor_has_valid_audio_batch_dimension(tensor, expected_value):
+def test_has_valid_batch_dim(tensor, expected_value):
 
-    assert tensor_has_valid_audio_batch_dimension(tensor) == expected_value
+    assert has_valid_batch_dim(tensor) == expected_value
 
 
-def test_add_audio_batch_dimension():
+def test_add_batch_dim():
     tensor = torch.ones(1, 48000)
     expected_tensor = torch.ones(1, 1, 48000)
 
-    tensor = add_audio_batch_dimension(tensor)
+    tensor = add_batch_dim(tensor)
     assert torch.eq(tensor, expected_tensor).all()
-    assert tensor_has_valid_audio_batch_dimension(tensor) == True
+    assert has_valid_batch_dim(tensor) == True
 
     tensor = torch.ones(48000)
     expected_tensor = torch.ones(1, 48000)
 
-    tensor = add_audio_batch_dimension(tensor)
+    tensor = add_batch_dim(tensor)
     assert torch.eq(tensor, expected_tensor).all()
-    assert tensor_has_valid_audio_batch_dimension(tensor) == False
+    assert has_valid_batch_dim(tensor) == False
 
 
-def test_remove_audio_batch_dimension():
+def test_remove_batch_dim():
     tensor = torch.ones(1, 1, 48000)
     expected_tensor = torch.ones(1, 48000)
 
-    tensor = remove_audio_batch_dimension(tensor)
+    tensor = remove_batch_dim(tensor)
     assert torch.eq(tensor, expected_tensor).all()
 
     tensor = torch.ones(1, 48000)
     expected_tensor = torch.ones(48000)
 
-    tensor = remove_audio_batch_dimension(tensor)
+    tensor = remove_batch_dim(tensor)
     assert torch.eq(tensor, expected_tensor).all()
-    assert tensor_has_valid_audio_batch_dimension(tensor) == False
+    assert has_valid_batch_dim(tensor) == False

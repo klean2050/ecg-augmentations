@@ -1,49 +1,42 @@
-import pytest
-import torch
-from torchaudio_augmentations import (
-    Compose,
-    ComposeMany,
-    RandomResizedCrop,
-    Reverb,
-)
+import pytest, torch
+import neurokit2 as nk
+from ecg_augmentations import *
 
-from .utils import generate_waveform
 
-sample_rate = 22050
-num_samples = sample_rate * 5
+dur, sr = 10, 100
+num_samples = dur * sr
 
 
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_compose(num_channels):
-    audio = generate_waveform(sample_rate, num_samples, num_channels)
+    ecg = nk.ecg_simulate(duration=dur, sampling_rate=sr)
     transform = Compose(
         [
-            RandomResizedCrop(num_samples),
+            RandomCrop(num_samples),
         ]
     )
 
-    t_audio = transform(audio)
-    assert t_audio.shape[0] == num_channels
-    assert t_audio.shape[1] == num_samples
+    t_ecg = transform(ecg)
+    assert t_ecg.shape[0] == num_channels
+    assert t_ecg.shape[1] == num_samples
 
 
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_compose_many(num_channels):
     num_augmented_samples = 4
-
-    audio = generate_waveform(sample_rate, num_samples, num_channels)
+    ecg = nk.ecg_simulate(duration=dur, sampling_rate=sr)
     transform = ComposeMany(
         [
-            RandomResizedCrop(num_samples),
-            Reverb(sample_rate),
+            RandomCrop(num_samples),
+            Reverse(),
         ],
         num_augmented_samples=num_augmented_samples,
     )
 
-    t_audio = transform(audio)
-    assert t_audio.shape[0] == num_augmented_samples
-    assert t_audio.shape[1] == num_channels
-    assert t_audio.shape[2] == num_samples
+    t_ecg = transform(ecg)
+    assert t_ecg.shape[0] == num_augmented_samples
+    assert t_ecg.shape[1] == num_channels
+    assert t_ecg.shape[2] == num_samples
 
     for n in range(1, num_augmented_samples):
-        assert torch.all(t_audio[0].eq(t_audio[n])) == False
+        assert torch.all(t_ecg[0].eq(t_ecg[n])) == False
