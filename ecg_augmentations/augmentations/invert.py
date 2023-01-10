@@ -1,7 +1,7 @@
 import torch
 
 
-class PolarityInversion(torch.nn.Module):
+class Invert(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
