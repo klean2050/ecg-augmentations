@@ -1,9 +1,8 @@
-import random
-import torch
-from torchaudio_augmentations import HighPassFilter, LowPassFilter
+import random, torch.nn as nn
+from ecg_augmentations import HighPassFilter, LowPassFilter
 
 
-class HighLowPass(torch.nn.Module):
+class HighLowPass(nn.Module):
     def __init__(
         self,
         sample_rate: int,
@@ -22,10 +21,9 @@ class HighLowPass(torch.nn.Module):
             sample_rate, lowpass_freq_low, lowpass_freq_high
         )
 
-    def forward(self, audio):
-        highlowband = random.randint(0, 1)
-        if highlowband == 0:
-            audio = self.high_pass_filter(audio)
-        else:
-            audio = self.low_pass_filter(audio)
-        return audio
+    def forward(self, x):
+        return (
+            self.low_pass_filter(x)
+            if random.randint(0, 1)
+            else self.high_pass_filter(x)
+        )

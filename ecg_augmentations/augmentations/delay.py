@@ -1,6 +1,5 @@
-import random
+import random, torch
 import numpy as np
-import torch
 
 
 class Delay(torch.nn.Module):

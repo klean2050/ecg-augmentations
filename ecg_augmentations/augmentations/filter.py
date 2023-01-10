@@ -1,5 +1,4 @@
-import random
-import torch
+import random, torch
 from julius.filters import highpass_filter, lowpass_filter
 
 
@@ -31,11 +30,10 @@ class HighPassFilter(FrequencyFilter):
     ):
         super().__init__(sample_rate, freq_low, freq_high)
 
-    def forward(self, audio: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         frequency = self.sample_uniform_frequency()
         cutoff = self.cutoff_frequency(frequency)
-        audio = highpass_filter(audio, cutoff=cutoff)
-        return audio
+        return highpass_filter(x, cutoff=cutoff)
 
 
 class LowPassFilter(FrequencyFilter):
@@ -47,8 +45,7 @@ class LowPassFilter(FrequencyFilter):
     ):
         super().__init__(sample_rate, freq_low, freq_high)
 
-    def forward(self, audio: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         frequency = self.sample_uniform_frequency()
         cutoff = self.cutoff_frequency(frequency)
-        audio = lowpass_filter(audio, cutoff=cutoff)
-        return audio
+        return lowpass_filter(x, cutoff=cutoff)
