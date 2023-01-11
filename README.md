@@ -24,7 +24,7 @@ transforms = [
     RandomApply([QRSMask()], p=0.4),
     RandomApply([Scale()], p=0.5),
     RandomApply([Permute()], p=0.6),
-    RandomApply([GaussianNoise(max_snr=0.005)], p=0.8),
+    GaussianNoise(max_snr=0.005),
     RandomApply([Invert()], p=0.2),
     RandomApply([Reverse()], p=0.2),
 ]
