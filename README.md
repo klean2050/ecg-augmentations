@@ -6,7 +6,7 @@ ECG time-series augmentations library for PyTorch. The focus of this repo is to:
 - Make every transformation differentiable through `nn.Module`.
 - Optimise ECG transformations for CPU and GPU devices.
 
-This repo supports stochastic transformations as used often in self-supervised and semi-supervised learning methods. One can apply a single stochastic augmentation or create as many stochastically transformed ECG examples from a single interface. This package follows the conventions set out by `torchaudio-augmentations`, with an ECG sample defined as a tensor of `[lead, time]`, or a batched representation `[batch, lead, time]`. Each individual augmentation can be initialized on its own, or be wrapped around a `RandomApply` interface which will apply the augmentation with probability `p`. **Note**: Current version has been tested on single-lead ECG.
+This repo supports stochastic transformations as used often in self-supervised and semi-supervised learning methods. One can apply a single stochastic augmentation or create as many stochastically transformed ECG examples from a single interface. This package follows the conventions set out by [torchaudio-augmentations](https://github.com/Spijkervet/torchaudio-augmentations), with an ECG sample defined as a tensor of `[lead, time]`, or a batched representation `[batch, lead, time]`. Each individual augmentation can be initialized on its own, or be wrapped around a `RandomApply` interface which will apply the augmentation with probability `p`. **Note**: Current version has been tested on single-lead ECG.
 
 ## Usage
 
@@ -19,11 +19,14 @@ ecg = torch.load("tests/some_ecg.pt")
 
 num_samples = ecg.shape[-1] * 0.5
 transforms = [
-    RandomResizedCrop(n_samples=int(num_samples)),
-    RandomApply([PolarityInversion()], p=0.8),
-    RandomApply([Noise(min_snr=0.001, max_snr=0.005)], p=0.3),
-    HighLowPass(sample_rate=sr), # this will always be applied
-    RandomApply([Delay(sample_rate=sr)], p=0.5),
+    RandomCrop(n_samples=num_samples),
+    RandomApply([PRMask()], p=0.4),
+    RandomApply([QRSMask()], p=0.4),
+    RandomApply([Scale()], p=0.5),
+    RandomApply([Permute()], p=0.6),
+    RandomApply([GaussianNoise(max_snr=0.005)], p=0.8),
+    RandomApply([Invert()], p=0.2),
+    RandomApply([Reverse()], p=0.2),
 ]
 ```
 
@@ -31,13 +34,13 @@ One can also define a stochastic augmentation on multiple transformations:
 
 ```python
 transforms = [
-    RandomResizedCrop(n_samples=num_samples),
-    RandomApply([PolarityInversion(), Noise(min_snr=0.001, max_snr=0.005)], p=0.8),
-    RandomApply([Delay(sample_rate=sr), Reverb(sample_rate=sr)], p=0.5)
+    RandomCrop(n_samples=num_samples),
+    RandomApply([PRMask(), QRSMask()], p=0.8),
+    RandomApply([Invert(), Reverse()], p=0.5)
 ]
 ```
 
-We can return either one ...
+One can return either one ...
 
 ```python
 transform = Compose(transforms=transforms)
@@ -53,6 +56,6 @@ transformed_ecg =  transform(ecg)
 >> transformed_ecg.shape = [2, num_leads, num_samples]
 ```
 
-# Citation
+## Citation
 
 TBD
