@@ -3,10 +3,18 @@
 ECG time-series augmentations library for PyTorch. The focus of this repo is to:
 - Provide many transformations in an easy-to-use Python interface.
 - Easily control stochastic / sequential transformations.
-- Make every transformation differentiable through `nn.Module`.
+- Make every transformation differentiable through `torch.nn.Module`.
 - Optimise ECG transformations for CPU and GPU devices.
 
 This repo supports stochastic transformations as used often in self-supervised and semi-supervised learning methods. One can apply a single stochastic augmentation or create as many stochastically transformed ECG examples from a single interface. This package follows the conventions set out by [torchaudio-augmentations](https://github.com/Spijkervet/torchaudio-augmentations), with an ECG sample defined as a tensor of `[lead, time]`, or a batched representation `[batch, lead, time]`. Each individual augmentation can be initialized on its own, or be wrapped around a `RandomApply` interface which will apply the augmentation with probability `p`. **Note**: Current version has been tested on single-lead ECG.
+
+## Installation
+
+Just clone the repository and install the dependencies:
+```
+git clone https://github.com/klean2050/ecg-augmentations
+cd ecg-augmentations && pip install -e .
+```
 
 ## Usage
 
