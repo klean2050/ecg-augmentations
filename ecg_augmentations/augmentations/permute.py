@@ -17,8 +17,8 @@ class Permute(torch.nn.Module):
         for this_bps in bps[1:]:
             last_item = intervals[-1][-1]
             intervals.append(torch.arange(last_item + 1, this_bps))
-        intervals.append(torch.arange(bps[-1] + 1, len(x)))
+        intervals.append(torch.arange(bps[-1], len(x)))
 
         random.shuffle(intervals)
-        permuted = [torch.tensor(x[i]) for i in intervals]
+        permuted = [x[i].clone() for i in intervals]
         return torch.hstack(permuted)
