@@ -15,8 +15,11 @@ class PRMask(torch.nn.Module):
         # P peak detection has weaker accuracy
         intervals = [torch.arange(ri - 20, ri + 1) for ri in r_peaks]
         for interval in intervals:
+            interval = interval[interval < len(x)]
             if torch.rand(1) > self.ratio:
-                x[interval] = x[interval[0] - 1] if interval[0] else x[0]
+                x[interval] = (
+                    x[interval[0] - 1].clone() if interval[0] else x[0].clone()
+                )
         return x
 
 
@@ -33,8 +36,11 @@ class QRSMask(torch.nn.Module):
         # S peaks happen ~5 samples after R
         intervals = [torch.arange(ri - 5, ri + 6) for ri in r_peaks]
         for interval in intervals:
+            interval = interval[interval < len(x)]
             if torch.rand(1) > self.ratio:
-                x[interval] = x[interval[0] - 1] if interval[0] else x[0]
+                x[interval] = (
+                    x[interval[0] - 1].clone() if interval[0] else x[0].clone()
+                )
         return x
 
 
@@ -51,8 +57,11 @@ class QTMask(torch.nn.Module):
         # T peaks happen ~30 samples after R
         intervals = [torch.arange(ri - 5, ri + 31) for ri in r_peaks]
         for interval in intervals:
+            interval = interval[interval < len(x)]
             if torch.rand(1) > self.ratio:
-                x[interval] = x[interval[0] - 1] if interval[0] else x[0]
+                x[interval] = (
+                    x[interval[0] - 1].clone() if interval[0] else x[0].clone()
+                )
         return x
 
 
@@ -81,5 +90,5 @@ class RandMask(torch.nn.Module):
             durations.append(random_end - random_start - sum(intersections))
 
         for interval in intervals:
-            x[interval] = x[interval[0] - 1] if interval[0] else x[0]
+            x[interval] = x[interval[0] - 1].clone() if interval[0] else x[0].clone()
         return x
