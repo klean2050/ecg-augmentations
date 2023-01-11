@@ -19,7 +19,7 @@ REQUIRES_PYTHON = ">=3.9.0"
 VERSION = "0.1.0"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy", "torch", "julius"]
+REQUIRED = ["numpy", "torch", "julius", "neurokit2"]
 TEST_REQUIRED = ["pytest", "pytest-cov", "black"]
 
 # What packages are optional?
