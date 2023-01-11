@@ -1,7 +1,7 @@
-import random, torch
+import random, torch.nn as nn
 
 
-class RandomCrop(torch.nn.Module):
+class RandomCrop(nn.Module):
     def __init__(self, n_samples):
         super().__init__()
         self.n_samples = n_samples
