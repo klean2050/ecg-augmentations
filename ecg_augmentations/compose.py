@@ -3,7 +3,8 @@ import torch
 
 class Compose:
     """
-    Data augmentation module that transforms any given data example with a chain of augmentations.
+    Data augmentation module that transforms any
+    given data example with a chain of augmentations.
     """
 
     def __init__(self, transforms):

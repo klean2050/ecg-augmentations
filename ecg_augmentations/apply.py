@@ -35,16 +35,11 @@ class RandomApply(torch.nn.Module):
     """Apply randomly a list of transformations with a given probability.
 
     Note:
-        In order to script the transformation, please use ``torch.nn.ModuleList`` as input instead of list/tuple of
-        transforms as shown below:
+        In order to script the transformation, please use ``torch.nn.ModuleList``
+        as input instead of list/tuple of transforms as shown below:
 
-        >>> transforms = transforms.RandomApply(torch.nn.ModuleList([
-        >>>     transforms.ColorJitter(),
-        >>> ]), p=0.3)
-        >>> scripted_transforms = torch.jit.script(transforms)
-
-        Make sure to use only scriptable transformations, i.e. that work with ``torch.Tensor``, does not require
-        `lambda` functions or ``PIL.Image``.
+        Make sure to use only scriptable transformations,
+        i.e. that work with ``torch.Tensor``.
 
     Args:
         transforms (list or tuple or torch.nn.Module): list of transformations

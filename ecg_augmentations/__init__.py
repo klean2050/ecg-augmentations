@@ -1,6 +1,5 @@
 from .apply import RandomApply
 from .compose import Compose, ComposeMany
-from .augmentations.neighbor import GetNeighbor
 from .augmentations.filter import HighPassFilter, LowPassFilter, HighLowPass
 from .augmentations.noise import GaussianNoise, RandWanderer
 from .augmentations.invert import Invert
