@@ -9,7 +9,7 @@ class Permute(torch.nn.Module):
 
     def forward(self, x):
         n_bps = self.n_patches - 1
-        base = np.arange(1, len(x) - 2)
+        base = np.arange(1, x.shape[-1] - 2)
         bps = np.random.choice(base, n_bps, replace=False)
         bps = np.sort(bps)
 
@@ -17,8 +17,8 @@ class Permute(torch.nn.Module):
         for this_bps in bps[1:]:
             last_item = intervals[-1][-1]
             intervals.append(torch.arange(last_item + 1, this_bps))
-        intervals.append(torch.arange(bps[-1], len(x)))
+        intervals.append(torch.arange(bps[-1], x.shape[-1]))
 
         random.shuffle(intervals)
-        permuted = [x[i].clone() for i in intervals]
+        permuted = [x[..., i].clone() for i in intervals]
         return torch.hstack(permuted)

@@ -3,7 +3,7 @@ import numpy as np
 
 
 class GaussianNoise(torch.nn.Module):
-    def __init__(self, min_snr=0.0001, max_snr=0.01):
+    def __init__(self, min_snr=0.01, max_snr=0.5):
         """
         min_snr: Minimum signal-to-noise ratio
         max_snr: Maximum signal-to-noise ratio
@@ -27,7 +27,7 @@ class RandWanderer(torch.nn.Module):
         self.end_phase = end_phase
 
     def forward(self, x):
-        sn = np.linspace(self.start_phase, self.end_phase, len(x))
+        sn = np.linspace(self.start_phase, self.end_phase, x.shape[-1])
         sn = self.amp * np.sin(np.pi * sn / 180)
-        gauss_noise = GaussianNoise()
+        gauss_noise = GaussianNoise()(x).numpy()
         return x + sn.astype(np.float32) + gauss_noise.astype(np.float32)
