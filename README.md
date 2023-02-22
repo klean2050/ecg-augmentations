@@ -28,7 +28,7 @@ from ecg_augmentations import *
 # 1 lead, 100 samples
 ecg = torch.load("tests/some_ecg.pt")
 
-num_samples = ecg.shape[-1] * 0.5
+num_samples = ecg.shape[-1] // 2
 transforms = [
     RandomCrop(n_samples=num_samples),
     RandomApply([PRMask()], p=0.4),
