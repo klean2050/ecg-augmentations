@@ -19,7 +19,7 @@ class TimeWarp(nn.Module):
     adapted from https://github.com/pritamqu/SSL-ECG/blob/master/implementation/signal_transformation_task.py
     """
 
-    def __init__(self, sr, warps, stretch_factor, squeeze_factor):
+    def __init__(self, sr, warps=5, stretch_factor=1.2, squeeze_factor=1.2):
         super().__init__()
         self.sr = sr
         self.warps = warps
