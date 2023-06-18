@@ -70,11 +70,13 @@ transformed_ecg =  transform(ecg)
 ## Citation
 
 ```
-@software{avramidis_ecgaug,
+@software{avramidis_kleanthis_2023_8053043,
     author = {Avramidis, Kleanthis},
     title = {ecg-augmentations},
-    url = {https://github.com/klean2050/ecg-augmentations},
-    version = {1.0.0},
-    year = {2023}
+    year = 2023,
+    publisher = {Zenodo},
+    version = {v1.0.0-beta},
+    doi = {10.5281/zenodo.8053043},
+    url = {https://doi.org/10.5281/zenodo.8053043}
 }
 ```
