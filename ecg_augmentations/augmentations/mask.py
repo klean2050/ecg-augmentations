@@ -3,9 +3,9 @@ import neurokit2 as nk
 
 
 class PRMask(torch.nn.Module):
-    def __init__(self, sr, ratio=0.5):
+    def __init__(self, sample_rate, ratio=0.5):
         super().__init__()
-        self.sr = sr
+        self.sr = sample_rate
         self.ratio = ratio
 
     def forward(self, x):
@@ -20,18 +20,19 @@ class PRMask(torch.nn.Module):
         for interval in intervals:
             interval = interval[interval < x.shape[-1]]
             if torch.rand(1) > self.ratio:
-                x[..., interval] = (
-                    x[..., interval[0] - 1].clone()
-                    if interval[0]
-                    else x[..., 0].clone()
-                )
+                for lead in range(x.shape[0]):
+                    x[lead, interval] = (
+                        x[lead, interval[0] - 1].clone()
+                        if interval[0]
+                        else x[lead, 0].clone()
+                    )
         return x
 
 
 class QRSMask(torch.nn.Module):
-    def __init__(self, sr, ratio=0.5):
+    def __init__(self, sample_rate, ratio=0.5):
         super().__init__()
-        self.sr = sr
+        self.sr = sample_rate
         self.ratio = ratio
 
     def forward(self, x):
@@ -47,18 +48,19 @@ class QRSMask(torch.nn.Module):
         for interval in intervals:
             interval = interval[interval < x.shape[-1]]
             if torch.rand(1) > self.ratio:
-                x[..., interval] = (
-                    x[..., interval[0] - 1].clone()
-                    if interval[0]
-                    else x[..., 0].clone()
-                )
+                for lead in range(x.shape[0]):
+                    x[lead, interval] = (
+                        x[lead, interval[0] - 1].clone()
+                        if interval[0]
+                        else x[lead, 0].clone()
+                    )
         return x
 
 
 class QTMask(torch.nn.Module):
-    def __init__(self, sr, ratio=0.5):
+    def __init__(self, sample_rate, ratio=0.5):
         super().__init__()
-        self.sr = sr
+        self.sr = sample_rate
         self.ratio = ratio
 
     def forward(self, x):
@@ -73,16 +75,17 @@ class QTMask(torch.nn.Module):
         for interval in intervals:
             interval = interval[interval < x.shape[-1]]
             if torch.rand(1) > self.ratio:
-                x[..., interval] = (
-                    x[..., interval[0] - 1].clone()
-                    if interval[0]
-                    else x[..., 0].clone()
-                )
+                for lead in range(x.shape[0]):
+                    x[lead, interval] = (
+                        x[lead, interval[0] - 1].clone()
+                        if interval[0]
+                        else x[lead, 0].clone()
+                    )
         return x
 
 
 class RandMask(torch.nn.Module):
-    def __init__(self, ratio):
+    def __init__(self, ratio=0.5):
         super().__init__()
         self.ratio = ratio
 
@@ -107,7 +110,8 @@ class RandMask(torch.nn.Module):
             durations.append(random_end - random_start - sum(intersections))
 
         for interval in intervals:
-            x[..., interval] = (
-                x[..., interval[0] - 1].clone() if interval[0] else x[..., 0].clone()
-            )
+            for lead in range(x.shape[0]):
+                x[lead, interval] = (
+                    x[lead, interval[0] - 1].clone() if interval[0] else x[lead, 0].clone()
+                )
         return x
