@@ -1,7 +1,7 @@
 import torch.nn as nn
 import cv2, math
 import numpy as np, torch
-
+from scipy.interpolate import interp1d
 
 class Scale(torch.nn.Module):
     def __init__(self, max_factor=5):
@@ -14,62 +14,29 @@ class Scale(torch.nn.Module):
 
 
 class TimeWarp(nn.Module):
-    """
-    Stretch and squeeze signal randomly along the time axis
-    adapted from https://github.com/pritamqu/SSL-ECG/blob/master/implementation/signal_transformation_task.py
-    """
+    """Currently supports only stretching"""
 
-    def __init__(self, sr, warps=5, stretch_factor=1.2, squeeze_factor=1.2):
+    def __init__(self, stretch_factor="random"):
         super().__init__()
-        self.sr = sr
-        self.warps = warps
-        self.stretch_factor = stretch_factor
-        self.squeeze_factor = squeeze_factor
+        self.ratio = stretch_factor
+        if self.ratio == "random":
+            self.ratio = np.random.uniform(0.1, 0.9)
+        assert self.ratio > 0 and self.ratio < 1, "Stretch factor must be between 0 and 1"
 
     def forward(self, x):
         x = x.numpy()
-        total_time = x.shape[-1] // self.sr
-        segment_time = total_time / self.warps
-        sequence = list(range(self.warps))
+        length = len(x[0])
 
-        stretch = np.random.choice(
-            sequence, math.ceil(len(sequence) / 2), replace=False
-        )
-        squeeze = list(set(sequence).difference(set(stretch)))
+        # Generate a time vector for the original signal
+        time_vector = np.linspace(0, length, num=length)
+        # Randomly generate a time warping function
+        warp = np.linspace(0, length * self.ratio, num=length)
 
-        initialize = True
-        for i in sequence:
-            orig_signal = x[
-                ...,
-                int(i * np.floor(segment_time * self.sr)) : int(
-                    (i + 1) * np.floor(segment_time * self.sr)
-                ),
-            ]
-            orig_signal = orig_signal.reshape(-1, 1)
+        # Apply time warping to each lead of the ECG signal
+        warped_signal = np.zeros_like(x)
+        for i in range(len(x)):
+            # Interpolate the ECG signal using the warping function
+            interpolation_func = interp1d(time_vector, x[i])
+            warped_signal[i] = interpolation_func(warp)
 
-            if i in stretch:
-                output_shape = int(
-                    np.ceil(np.shape(orig_signal)[0] * self.stretch_factor)
-                )
-                new_signal = cv2.resize(
-                    orig_signal, (1, output_shape), interpolation=cv2.INTER_LINEAR
-                )
-                if initialize == True:
-                    time_warped = new_signal
-                    initialize = False
-                else:
-                    time_warped = np.vstack((time_warped, new_signal))
-            elif i in squeeze:
-                output_shape = int(
-                    np.ceil(np.shape(orig_signal)[0] * self.squeeze_factor)
-                )
-                new_signal = cv2.resize(
-                    orig_signal, (1, output_shape), interpolation=cv2.INTER_LINEAR
-                )
-                if initialize == True:
-                    time_warped = new_signal
-                    initialize = False
-                else:
-                    time_warped = np.vstack((time_warped, new_signal))
-
-        return torch.Tensor(time_warped).reshape(1, -1)
+        return torch.Tensor(warped_signal)
