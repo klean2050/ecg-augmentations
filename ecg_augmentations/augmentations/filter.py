@@ -13,6 +13,8 @@ class FrequencyFilter(torch.nn.Module):
         self.sample_rate = sample_rate
         self.freq_low = freq_low
         self.freq_high = freq_high
+        assert freq_low < freq_high, "freq_low must be less than freq_high"
+        assert freq_high < sample_rate / 2, "freq_high must be less than sample_rate/2"
 
     def cutoff_frequency(self, frequency: float) -> float:
         return frequency / self.sample_rate
