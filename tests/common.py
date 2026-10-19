@@ -1,0 +1,43 @@
+import torch
+
+import ecg_augmentations as ea
+
+FS = 250
+ECG, PEAKS = ea.synthetic_ecg(duration=10, fs=FS, n_leads=12, seed=0)
+NOISE = torch.randn(3, 4000, generator=torch.Generator().manual_seed(0))
+
+
+def detector(signal, fs):
+    return PEAKS[PEAKS < len(signal)].numpy()
+
+
+TRANSFORMS = {
+    "RandomCrop": lambda: ea.RandomCrop(duration=8, fs=FS),
+    "HighPassFilter": lambda: ea.HighPassFilter(FS),
+    "LowPassFilter": lambda: ea.LowPassFilter(FS),
+    "Invert": lambda: ea.Invert(),
+    "Reverse": lambda: ea.Reverse(),
+    "Permute": lambda: ea.Permute(),
+    "AmplitudeScale": lambda: ea.AmplitudeScale(per_lead=True),
+    "GaussianNoise": lambda: ea.GaussianNoise(),
+    "BaselineWander": lambda: ea.BaselineWander(FS),
+    "PowerlineNoise": lambda: ea.PowerlineNoise(FS, harmonics=2),
+    "TimeMask": lambda: ea.TimeMask(FS, n_masks=(1, 3)),
+    "LeadMask": lambda: ea.LeadMask(n_leads=(1, 6)),
+    "PRMask": lambda: ea.PRMask(FS, detector=detector),
+    "QRSMask": lambda: ea.QRSMask(FS, detector=detector),
+    "QTMask": lambda: ea.QTMask(FS, detector=detector),
+    "TimeStretch": lambda: ea.TimeStretch(),
+    "MuscleNoise": lambda: ea.MuscleNoise(FS),
+    "BaselineShift": lambda: ea.BaselineShift(),
+    "RecordedNoise": lambda: ea.RecordedNoise(NOISE),
+    "RandomTimeWarp": lambda: ea.RandomTimeWarp(),
+    "TimeShift": lambda: ea.TimeShift(FS, circular=False),
+    "FrequencyMask": lambda: ea.FrequencyMask(FS, n_masks=2),
+    "RandomResizedCrop": lambda: ea.RandomResizedCrop(2000),
+    "VCGRotation": lambda: ea.VCGRotation(),
+    "LeadSubset": lambda: ea.LeadSubset(),
+    "DeriveLimbLeads": lambda: ea.DeriveLimbLeads(),
+}
+
+TWELVE_LEAD = (ea.VCGRotation, ea.LeadSubset, ea.DeriveLimbLeads)

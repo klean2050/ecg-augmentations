@@ -1,44 +1,67 @@
+import numpy as np
 import torch
 
+from .base import Transform, randint
 
-class Compose:
+
+class Compose(Transform):
+    """Apply transforms in sequence.
+
+    Args:
+        transforms: list of transforms, or a single transform.
     """
-    Data augmentation module that transforms any
-    given data example with a chain of augmentations.
-    """
 
-    def __init__(self, transforms):
-        self.transforms = transforms
+    def __init__(self, transforms, p=1.0):
+        super().__init__(p)
+        if isinstance(transforms, torch.nn.Module):
+            transforms = [transforms]
+        self.transforms = torch.nn.ModuleList(transforms)
 
-    def __call__(self, x):
-        return self.transform(x)
-
-    def __repr__(self):
-        format_string = self.__class__.__name__ + "("
+    def apply(self, x, generator=None):
         for t in self.transforms:
-            format_string += "\n"
-            format_string += "\t{0}".format(t)
-        format_string += "\n)"
-        return format_string
-
-    def transform(self, x):
-        for t in self.transforms:
-            x = t(x)
+            x = t(x, generator=generator)
         return x
+
+    def extra_repr(self):
+        return f"p={self.p}"
+
+
+class RandomApply(Compose):
+    """Apply transforms in sequence with probability p, decided per sample."""
+
+    def __init__(self, transforms, p=0.5):
+        super().__init__(transforms, p)
+
+
+class OneOf(Compose):
+    """Apply one transform chosen uniformly at random per sample."""
+
+    def apply(self, x, generator=None):
+        choice = randint(0, len(self.transforms), x.shape[0], x, generator)
+        out = x.clone()
+        for k, t in enumerate(self.transforms):
+            chosen = choice == k
+            if chosen.any():
+                out[chosen] = t(x[chosen], generator=generator)
+        return out
 
 
 class ComposeMany(Compose):
-    """
-    Data augmentation module that transforms any given data example,
-    randomly resulting in N correlated views of the same example.
+    """Apply transforms independently N times, stacking the views along a new first axis.
+
+    Args:
+        transforms: list of transforms, or a single transform.
+        num_augmented_samples: number of views N.
     """
 
     def __init__(self, transforms, num_augmented_samples):
-        self.transforms = transforms
+        super().__init__(transforms)
         self.num_augmented_samples = num_augmented_samples
 
-    def __call__(self, x):
-        samples = []
-        for _ in range(self.num_augmented_samples):
-            samples.append(self.transform(x).unsqueeze(dim=0).clone())
-        return torch.cat(samples, dim=0)
+    def forward(self, x, generator=None):
+        forward = super().forward
+        views = [forward(x, generator) for _ in range(self.num_augmented_samples)]
+        return np.stack(views) if isinstance(x, np.ndarray) else torch.stack(views)
+
+    def extra_repr(self):
+        return f"num_augmented_samples={self.num_augmented_samples}"

@@ -1,9 +1,10 @@
 import torch
 
+from ..base import Transform
 
-class Reverse(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
 
-    def forward(self, x):
+class Reverse(Transform):
+    """Reverse the signal in time."""
+
+    def apply(self, x, generator=None):
         return torch.flip(x, dims=[-1])
