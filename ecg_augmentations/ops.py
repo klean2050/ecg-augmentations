@@ -9,16 +9,20 @@ def add_noise(x, noise, snr_db):
     return x + torch.sqrt(signal / power / 10 ** (snr_db / 10)) * noise
 
 
-def fft_filter(x, fs, gain):
-    """Zero-phase filter along time; gain maps frequencies (Hz) to amplitude gain."""
+def fft_filter(x, fs, gain, pad=True):
+    """Zero-phase filter along time; gain maps frequencies (Hz) to amplitude gain.
+
+    With pad, the signal is extended by odd reflection to limit edge effects;
+    without, filtering is circular, which suits generated stationary noise.
+    """
     n = x.shape[-1]
-    pad = n - 1
-    left = 2 * x[..., :1] - x[..., 1 : pad + 1].flip(-1)
-    right = 2 * x[..., -1:] - x[..., n - pad - 1 : n - 1].flip(-1)
+    p = n - 1 if pad else 0
+    left = 2 * x[..., :1] - x[..., 1 : p + 1].flip(-1)
+    right = 2 * x[..., -1:] - x[..., n - p - 1 : n - 1].flip(-1)
     xp = torch.cat([left, x, right], dim=-1)
     freqs = torch.fft.rfftfreq(xp.shape[-1], d=1 / fs).to(x.device, x.dtype)
     y = torch.fft.irfft(torch.fft.rfft(xp) * gain(freqs), n=xp.shape[-1])
-    return y[..., pad : pad + n]
+    return y[..., p : p + n]
 
 
 def butter_gain(cutoff, order, highpass=False):

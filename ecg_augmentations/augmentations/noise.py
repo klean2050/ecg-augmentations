@@ -117,11 +117,14 @@ class MuscleNoise(Transform):
         b, c, t = x.shape
         highpass = butter_gain(self.band[0], 4, highpass=True)
         lowpass = butter_gain(min(self.band[1], 0.45 * self.fs), 4)
-        band = lambda freqs: highpass(freqs) * lowpass(freqs)
-        noise = fft_filter(randn(x.shape, x, generator), self.fs, band)
+        noise = randn(x.shape, x, generator)
+        noise = fft_filter(
+            noise, self.fs, lambda f: highpass(f) * lowpass(f), pad=False
+        )
         if self.bursts:
             envelope = randn((b, 1, t), x, generator)
-            noise = noise * fft_filter(envelope, self.fs, butter_gain(1.0, 2)).abs()
+            envelope = fft_filter(envelope, self.fs, butter_gain(1.0, 2), pad=False)
+            noise = noise * envelope.abs()
         snr = uniform(self.snr_db, (b, 1, 1), x, generator)
         return add_noise(x, noise, snr)
 

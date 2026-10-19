@@ -60,11 +60,8 @@ class TimeMask(MaskTransform):
         count = randint(self.n_masks[0], self.n_masks[1] + 1, (b, 1, 1), x, generator)
         mask = torch.zeros(b, 1, t, dtype=torch.bool, device=x.device)
         for k in range(self.n_masks[1]):
-            length = (
-                (uniform(self.duration, (b, 1, 1), x, generator) * self.fs)
-                .round()
-                .clamp(max=t)
-            )
+            seconds = uniform(self.duration, (b, 1, 1), x, generator)
+            length = (seconds * self.fs).round().clamp(max=t)
             start = randint(0, t - length + 1, (b, 1, 1), x, generator)
             mask |= (idx >= start) & (idx < start + length) & (k < count)
         return mask

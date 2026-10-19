@@ -31,13 +31,12 @@ def synthetic_ecg(
     rr = 60.0 / heart_rate
     n_beats = int(duration / rr) + 2
     peaks = 0.4 + torch.cumsum(rr + hrv * torch.randn(n_beats, generator=g), 0) - rr
-    peaks = peaks[peaks < duration - 0.4]
+    peaks = peaks[peaks < duration]
 
     t = torch.arange(round(duration * fs)) / fs
     offset, amp, width = (torch.tensor(v)[:, None, None] for v in zip(*WAVES))
-    waves = (
-        amp * torch.exp(-((t - peaks[:, None] - offset) ** 2) / (2 * width**2))
-    ).sum(1)
+    delay = t - peaks[:, None] - offset
+    waves = (amp * torch.exp(-(delay**2) / (2 * width**2))).sum(1)
     gains = 0.4 + 0.8 * torch.rand(n_leads, len(WAVES), generator=g)
     gains[0] = 1.0
     return (gains @ waves).float(), (peaks * fs).round().long()
