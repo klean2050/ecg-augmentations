@@ -3,10 +3,13 @@ import pytest, torch
 from pathlib import Path
 
 import ecg_augmentations as ea
+from tests.common import TWELVE_LEAD
 
 
 @pytest.mark.parametrize("shape", [(1, -1), (12, -1), (3, 12, -1)])
 def test_shape_preserved(transform, ecg, shape):
+    if shape == (1, -1) and isinstance(transform, TWELVE_LEAD):
+        pytest.skip("needs 12 leads")
     x = ecg[0] if shape == (1, -1) else ecg.expand(*shape[:-1], -1).clone()
     y = transform(x)
     assert y.shape[:-1] == x.shape[:-1]

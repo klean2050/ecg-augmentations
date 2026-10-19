@@ -1,5 +1,7 @@
 import torch
 
+from .augmentations.leads import derive_limb_leads
+
 # P, Q, R, S, T waves: (offset from R peak in s, amplitude, width in s)
 WAVES = (
     (-0.2, 0.15, 0.025),
@@ -20,6 +22,7 @@ def synthetic_ecg(
         fs: sampling rate (Hz).
         heart_rate: mean heart rate in beats per minute.
         n_leads: number of leads; lead 0 has unit gains, others random positive gains.
+            With 12 leads, III, aVR, aVL and aVF are derived from I and II.
         hrv: standard deviation of RR intervals in seconds.
         seed: seed for the RR intervals and lead gains.
 
@@ -39,4 +42,7 @@ def synthetic_ecg(
     waves = (amp * torch.exp(-(delay**2) / (2 * width**2))).sum(1)
     gains = 0.4 + 0.8 * torch.rand(n_leads, len(WAVES), generator=g)
     gains[0] = 1.0
-    return (gains @ waves).float(), (peaks * fs).round().long()
+    signal = (gains @ waves).float()
+    if n_leads == 12:
+        signal = derive_limb_leads(signal[None])[0]
+    return signal, (peaks * fs).round().long()

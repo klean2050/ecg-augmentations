@@ -35,4 +35,9 @@ TRANSFORMS = {
     "TimeShift": lambda: ea.TimeShift(FS, circular=False),
     "FrequencyMask": lambda: ea.FrequencyMask(FS, n_masks=2),
     "RandomResizedCrop": lambda: ea.RandomResizedCrop(2000),
+    "VCGRotation": lambda: ea.VCGRotation(),
+    "LeadSubset": lambda: ea.LeadSubset(),
+    "DeriveLimbLeads": lambda: ea.DeriveLimbLeads(),
 }
+
+TWELVE_LEAD = (ea.VCGRotation, ea.LeadSubset, ea.DeriveLimbLeads)

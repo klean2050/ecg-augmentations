@@ -7,6 +7,13 @@ from .synthetic import synthetic_ecg
 from .augmentations.crop import RandomCrop, RandomResizedCrop
 from .augmentations.filter import FrequencyMask, HighPassFilter, LowPassFilter
 from .augmentations.invert import Invert
+from .augmentations.leads import (
+    LEAD_SETS,
+    LEADS,
+    DeriveLimbLeads,
+    LeadSubset,
+    VCGRotation,
+)
 from .augmentations.mask import LeadMask, PRMask, QRSMask, QTMask, TimeMask
 from .augmentations.noise import (
     BaselineShift,

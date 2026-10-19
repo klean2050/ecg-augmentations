@@ -85,10 +85,21 @@ See [`examples/ssl_views.py`](examples/ssl_views.py) for paired views with a `Da
 | `RandomResizedCrop` | `n_samples`, `scale` (fraction) | random window resampled to a fixed length |
 | `TimeMask` | `fs`, `duration` (s), `n_masks`, `fill` | masks time windows |
 | `LeadMask` | `n_leads`, `fill` | masks whole leads, keeping at least one |
+| `LeadSubset` | `subsets` (`"6"`, `"4"`, `"3"`, `"2"`, `"1"`) | keeps a random reduced lead set (12-lead input) |
+| `VCGRotation` | `angle` (degrees), `scale` | rotates and scales the electrical axis in VCG space (12-lead input) |
+| `DeriveLimbLeads` | | recomputes III, aVR, aVL, aVF from I and II (12-lead input) |
 | `PRMask`, `QRSMask`, `QTMask` | `fs`, `ratio` (probability per beat), `detector` | masks the P wave/PR segment, QRS, or QRS-T |
 | `Mixup`, `CutMix` | `alpha` | batch-level mixing of signals and float labels: `x, y = Mixup()(x, y)` |
 
-Masks accept `return_mask=True` to also return the boolean mask, e.g. for masked-reconstruction objectives. The beat masks detect R peaks with neurokit2 by default. They also accept any `detector(signal, fs) -> peak_indices`. Their windows are fixed durations (0.2 s before R; ±0.05 s; 0.05 s before to 0.33 s after R), so they are approximate and do not adapt to heart rate.
+Masks accept `return_mask=True` to also return the boolean mask, e.g. for masked-reconstruction objectives. The beat masks detect R peaks with neurokit2 by default. They also accept any `detector(signal, fs) -> peak_indices`. Their windows are approximate: 0.2 s before R; ±0.05 s; and from 0.05 s before R to 0.33 s after it at 60 bpm, scaled with the RR interval as sqrt(RR) (Bazett).
+
+## 12-lead transforms
+
+`VCGRotation`, `LeadSubset` and `DeriveLimbLeads` expect 12 leads in the order I, II, III, aVR, aVL, aVF, V1–V6 (`ea.LEADS`).
+
+- `VCGRotation` maps leads I, II and V1–V6 to a vectorcardiogram with the Kors matrix, then rotates and scales it. It maps the result back, keeps the part of the signal the VCG does not capture, and rederives the remaining limb leads. Timing is unchanged and leads stay consistent. The idea follows 3KG (Gopal et al., 2021).
+- `LeadSubset` simulates reduced-lead devices. Its lead sets follow the PhysioNet/CinC Challenge 2021 (6, 4, 3 and 2 leads), plus lead I alone (`ea.LEAD_SETS`).
+- `DeriveLimbLeads` restores the relations III = II − I and aVR + aVL + aVF = 0 after per-lead transforms.
 
 ## Choosing augmentations
 
@@ -101,7 +112,8 @@ No augmentation is label-preserving for every task. Choose them by what your lab
 | `HighPassFilter` | ST/T distorted above ~0.5 Hz | preserved (zero-phase) | ST elevation/depression |
 | `LowPassFilter`, `FrequencyMask` | QRS notches, Q waves and pacing spikes blunted | preserved | fragmented QRS, pacemaker detection |
 | `AmplitudeScale` | shape preserved | preserved | voltage criteria (LVH, low voltage) |
-| `AmplitudeScale(per_lead=True)`, `LeadMask` | inter-lead relations broken | preserved | axis, lead-localized findings (e.g. MI territory) |
+| `AmplitudeScale(per_lead=True)`, `LeadMask`, `LeadSubset` | inter-lead relations broken or leads removed | preserved | axis, lead-localized findings (e.g. MI territory) |
+| `VCGRotation` | lead amplitudes redistributed, leads kept consistent | preserved | axis deviation, lead-localized findings at large angles |
 | `Invert` | polarity flipped | preserved | axis, T-wave inversion, Q waves, ST direction |
 | `Reverse` | wave order reversed | RR sequence reversed | conduction (PR), most morphology labels |
 | `TimeStretch`, `RandomTimeWarp`, `RandomResizedCrop` | intervals rescaled | heart rate, PR/QRS/QT changed | brady-/tachycardia, QT/QTc, QRS width (BBB) |

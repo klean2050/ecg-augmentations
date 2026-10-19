@@ -41,6 +41,8 @@ transforms = {
     "QRSMask": ea.QRSMask(FS, 1.0, detector=detector),
     "QTMask": ea.QTMask(FS, 1.0, detector=detector),
     "LeadMask(n_leads=11)": ea.LeadMask(11),
+    "LeadSubset(lead I only)": ea.LeadSubset(subsets=("1",)),
+    "VCGRotation(angle=30)": ea.VCGRotation(angle=(30, 30), scale=1.0),
 }
 
 
