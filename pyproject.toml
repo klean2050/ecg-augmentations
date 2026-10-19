@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ecg-augmentations"
+dynamic = ["version"]
+description = "ECG signal augmentations for PyTorch, for representation and self-supervised learning"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Kleanthis Avramidis", email = "k.avramidis@windowslive.com" }]
+requires-python = ">=3.10"
+dependencies = ["numpy", "torch>=2.0"]
+keywords = ["ecg", "augmentation", "pytorch", "self-supervised learning"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+
+[project.optional-dependencies]
+peaks = ["neurokit2"]
+examples = ["matplotlib"]
+dev = ["pytest", "pytest-cov", "black"]
+
+[project.urls]
+Homepage = "https://github.com/klean2050/ecg-augmentations"
+
+[tool.setuptools.dynamic]
+version = { attr = "ecg_augmentations.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["ecg_augmentations*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.black]
+target-version = ["py310"]

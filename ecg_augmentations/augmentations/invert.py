@@ -1,9 +1,8 @@
-import torch
+from ..base import Transform
 
 
-class Invert(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
+class Invert(Transform):
+    """Flip the signal polarity."""
 
-    def forward(self, x):
-        return torch.neg(x)
+    def apply(self, x, generator=None):
+        return -x
