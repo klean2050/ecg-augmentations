@@ -8,8 +8,9 @@ from ..ops import interp
 class TimeStretch(Transform):
     """Stretch the signal in time by a random factor, keeping its length.
 
-    A factor k > 1 lengthens all intervals (lower heart rate) and drops the end;
-    k < 1 shortens them and pads the end by repeating the last sample.
+    A factor k > 1 lengthens all intervals (lower heart rate) and keeps a random
+    window of the stretched signal; k < 1 shortens them and pads both ends, by a
+    random split, with the edge values.
 
     Args:
         factor: stretch factor or (low, high) range, all positive.
@@ -20,10 +21,11 @@ class TimeStretch(Transform):
         self.factor = as_range(factor, "factor", low=1e-6)
 
     def apply(self, x, generator=None):
-        factor = uniform(self.factor, (x.shape[0], 1, 1), x, generator)
-        return interp(
-            x, torch.arange(x.shape[-1], device=x.device, dtype=x.dtype) / factor
-        )
+        b, _, t = x.shape
+        factor = uniform(self.factor, (b, 1, 1), x, generator)
+        offset = uniform((0, 1), (b, 1, 1), x, generator) * (t - 1) * (1 - 1 / factor)
+        idx = torch.arange(t, device=x.device, dtype=x.dtype)
+        return interp(x, offset + idx / factor)
 
 
 class RandomTimeWarp(Transform):

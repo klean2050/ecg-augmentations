@@ -105,13 +105,24 @@ def test_random_crop_is_window(ecg):
     assert torch.equal(y, ecg[:, start : start + 300])
 
 
-def test_time_stretch(ecg):
+def r_peaks(lead):
+    is_max = (lead[1:-1] > lead[:-2]) & (lead[1:-1] >= lead[2:]) & (lead[1:-1] > 0.6)
+    return is_max.nonzero().flatten() + 1
+
+
+@pytest.mark.parametrize("factor", [0.8, 1.25])
+def test_time_stretch(ecg, factor):
     assert torch.allclose(ea.TimeStretch(1.0)(ecg), ecg, atol=1e-6)
-    y = ea.TimeStretch(1.25)(ecg)
-    stretched = (PEAKS * 1.25).round().long()
-    stretched = stretched[stretched < ecg.shape[-1]]
-    assert torch.allclose(y[0, stretched], ecg[0, PEAKS[: len(stretched)]], atol=0.15)
-    assert torch.all(y[0, stretched] > 0.8)
+    y = ea.TimeStretch(factor)(ecg)
+    rr = r_peaks(y[0]).diff().double().median()
+    assert abs(rr - factor * PEAKS.diff().double().median()) <= 2
+    flat = (y[0].diff() == 0).sum()
+    assert flat == 0 if factor > 1 else flat < 0.25 * ecg.shape[-1]
+
+
+def test_time_stretch_window_is_random(ecg):
+    starts = {int(r_peaks(ea.TimeStretch(1.5)(ecg)[0])[0]) for _ in range(20)}
+    assert len(starts) > 5
 
 
 def test_time_mask_fraction(ecg):
