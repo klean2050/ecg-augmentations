@@ -59,9 +59,8 @@ class ComposeMany(Compose):
         self.num_augmented_samples = num_augmented_samples
 
     def forward(self, x, generator=None):
-        views = [
-            super().forward(x, generator) for _ in range(self.num_augmented_samples)
-        ]
+        forward = super().forward
+        views = [forward(x, generator) for _ in range(self.num_augmented_samples)]
         return np.stack(views) if isinstance(x, np.ndarray) else torch.stack(views)
 
     def extra_repr(self):
