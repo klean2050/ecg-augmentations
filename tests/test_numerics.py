@@ -153,3 +153,49 @@ def test_beat_mask_near_start_does_not_wrap():
     x = torch.ones(1, 100)
     y = ea.PRMask(100, ratio=1.0, detector=lambda s, fs: [5], fill="zero")(x)
     assert y[0, :5].eq(0).all() and y[0, 5:].eq(1).all()
+
+
+def test_muscle_noise(ecg):
+    y = ea.MuscleNoise(FS, snr_db=15, bursts=False)(ecg)
+    assert torch.allclose(snr_db(ecg, y), torch.tensor(15.0), atol=0.01)
+    freqs, power = spectrum(y - ecg)
+    assert power[..., freqs < 15].sum() < 0.01 * power.sum()
+    assert torch.isfinite(ea.MuscleNoise(FS, bursts=True)(ecg)).all()
+
+
+def test_baseline_shift_is_step(ecg):
+    step = ea.BaselineShift(amplitude=0.5, relative=False)(ecg) - ecg
+    jumps = (step.diff(dim=-1).abs() > 1e-6).sum(-1)
+    assert torch.all(jumps <= 1)
+    assert torch.allclose(step[:, -1].abs(), torch.tensor(0.5), atol=1e-6)
+    assert torch.equal(jumps, jumps[0].expand_as(jumps))
+
+
+def test_recorded_noise(ecg):
+    bank = torch.randn(2, 5000, dtype=torch.float64)
+    assert torch.allclose(
+        snr_db(ecg, ea.RecordedNoise(bank, snr_db=12)(ecg)),
+        torch.tensor(12.0),
+        atol=0.01,
+    )
+    with pytest.raises(ValueError):
+        ea.RecordedNoise(bank[:, :100])(ecg)
+    sines = sine(7)[None].float()
+    freqs, power = spectrum(
+        ea.RecordedNoise(sines, snr_db=0)(ecg[:, :1000]) - ecg[:, :1000]
+    )
+    assert torch.all(freqs[power.argmax(-1)].round() == 7)
+
+
+def test_random_time_warp(ecg):
+    x = ecg.double()
+    assert torch.allclose(ea.RandomTimeWarp(sigma=0)(x), x, atol=1e-8)
+    y = ea.RandomTimeWarp(sigma=0.5)(ecg)
+    assert not torch.allclose(y, ecg, atol=1e-3)
+    assert torch.allclose(y[:, [0, -1]], ecg[:, [0, -1]], atol=1e-5)
+
+
+def test_time_shift(ecg):
+    assert torch.equal(ea.TimeShift(FS, shift=0.2)(ecg), ecg.roll(50, dims=-1))
+    y = ea.TimeShift(FS, shift=-0.2, circular=False)(ecg)
+    assert torch.equal(y[:, :-50], ecg[:, 50:]) and y[:, -50:].eq(0).all()

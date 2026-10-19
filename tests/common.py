@@ -1,7 +1,10 @@
+import torch
+
 import ecg_augmentations as ea
 
 FS = 250
 ECG, PEAKS = ea.synthetic_ecg(duration=10, fs=FS, n_leads=12, seed=0)
+NOISE = torch.randn(3, 4000, generator=torch.Generator().manual_seed(0))
 
 
 def detector(signal, fs):
@@ -25,4 +28,9 @@ TRANSFORMS = {
     "QRSMask": lambda: ea.QRSMask(FS, detector=detector),
     "QTMask": lambda: ea.QTMask(FS, detector=detector),
     "TimeStretch": lambda: ea.TimeStretch(),
+    "MuscleNoise": lambda: ea.MuscleNoise(FS),
+    "BaselineShift": lambda: ea.BaselineShift(),
+    "RecordedNoise": lambda: ea.RecordedNoise(NOISE),
+    "RandomTimeWarp": lambda: ea.RandomTimeWarp(),
+    "TimeShift": lambda: ea.TimeShift(FS, circular=False),
 }

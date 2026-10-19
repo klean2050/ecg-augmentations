@@ -7,8 +7,15 @@ from .augmentations.crop import RandomCrop
 from .augmentations.filter import HighPassFilter, LowPassFilter
 from .augmentations.invert import Invert
 from .augmentations.mask import LeadMask, PRMask, QRSMask, QTMask, TimeMask
-from .augmentations.noise import BaselineWander, GaussianNoise, PowerlineNoise
+from .augmentations.noise import (
+    BaselineShift,
+    BaselineWander,
+    GaussianNoise,
+    MuscleNoise,
+    PowerlineNoise,
+    RecordedNoise,
+)
 from .augmentations.permute import Permute
 from .augmentations.reverse import Reverse
 from .augmentations.scale import AmplitudeScale
-from .augmentations.time import TimeStretch
+from .augmentations.time import RandomTimeWarp, TimeShift, TimeStretch
