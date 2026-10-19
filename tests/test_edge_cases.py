@@ -18,6 +18,9 @@ import ecg_augmentations as ea
         lambda: ea.RandomCrop(duration=1),
         lambda: ea.Permute(0),
         lambda: ea.PRMask(100, ratio=2),
+        lambda: ea.FrequencyMask(100, width=60),
+        lambda: ea.RandomResizedCrop(100, scale=(0.5, 1.5)),
+        lambda: ea.Mixup(alpha=0),
     ],
 )
 def test_invalid_parameters(make):
@@ -39,7 +42,7 @@ def test_unknown_fill():
 
 @pytest.mark.parametrize("length", [1, 2, 5])
 def test_short_signals(transform, length):
-    if isinstance(transform, (ea.RandomCrop, ea.Permute)):
+    if isinstance(transform, (ea.RandomCrop, ea.RandomResizedCrop, ea.Permute)):
         pytest.skip("length-constrained")
     y = transform(torch.ones(12, length))
     assert y.shape == (12, length) and torch.isfinite(y).all()

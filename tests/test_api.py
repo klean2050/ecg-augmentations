@@ -11,7 +11,9 @@ def test_shape_preserved(transform, ecg, shape):
     y = transform(x)
     assert y.shape[:-1] == x.shape[:-1]
     assert y.shape[-1] == (
-        2000 if isinstance(transform, ea.RandomCrop) else x.shape[-1]
+        2000
+        if isinstance(transform, (ea.RandomCrop, ea.RandomResizedCrop))
+        else x.shape[-1]
     )
     assert torch.isfinite(y).all()
 

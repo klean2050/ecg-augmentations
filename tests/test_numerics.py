@@ -199,3 +199,46 @@ def test_time_shift(ecg):
     assert torch.equal(ea.TimeShift(FS, shift=0.2)(ecg), ecg.roll(50, dims=-1))
     y = ea.TimeShift(FS, shift=-0.2, circular=False)(ecg)
     assert torch.equal(y[:, :-50], ecg[:, 50:]) and y[:, -50:].eq(0).all()
+
+
+def test_frequency_mask():
+    x = (sine(5) + sine(40)).expand(2, -1)
+    y = ea.FrequencyMask(FS, width=4, max_freq=60)(x)
+    candidates = [x, sine(5).expand(2, -1), sine(40).expand(2, -1)]
+    assert any(torch.allclose(y, c, atol=1e-2) for c in candidates)
+    assert torch.equal(y[0], y[1])
+    removed = [
+        ea.FrequencyMask(FS, width=10, max_freq=50)(sine(40)).abs().max() < 0.01
+        for _ in range(200)
+    ]
+    assert 0.1 < sum(removed) / 200 < 0.4
+
+
+def test_random_resized_crop(ecg):
+    assert torch.allclose(ea.RandomResizedCrop(2500, scale=1.0)(ecg), ecg, atol=1e-5)
+    x = torch.arange(1000.0)[None]
+    y = ea.RandomResizedCrop(100, scale=0.5)(x)
+    assert torch.allclose(y.diff(), torch.tensor((500 - 1) / 99), atol=1e-3)
+
+
+def test_mixup(ecg):
+    x = torch.stack([ecg, 2 * ecg, 3 * ecg])
+    y = torch.eye(3)
+    g = torch.Generator().manual_seed(0)
+    xm, ym = ea.Mixup(alpha=0.4)(x, y, generator=g)
+    weights = ym @ torch.tensor([1.0, 2.0, 3.0])
+    assert torch.allclose(xm, weights[:, None, None] * ecg, atol=1e-5)
+    assert torch.allclose(ym.sum(-1), torch.ones(3))
+    g = torch.Generator().manual_seed(0)
+    assert torch.equal(ea.Mixup(alpha=0.4)(x, y, generator=g)[0], xm)
+    with pytest.raises(TypeError):
+        ea.Mixup()(x, torch.arange(3))
+
+
+def test_cutmix():
+    x = torch.stack([torch.zeros(2, 100), torch.ones(2, 100)])
+    xm, ym = ea.CutMix(alpha=1.0)(x, torch.eye(2))
+    for i in range(2):
+        other = 1 - i
+        assert torch.allclose(ym[i, other], (xm[i, 0] == other).float().mean())
+        assert torch.equal(xm[i, 0], xm[i, 1])

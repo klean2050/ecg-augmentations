@@ -1,3 +1,5 @@
+import torch
+
 from ..base import Transform, as_range, uniform
 from ..ops import butter_gain, fft_filter
 
@@ -44,3 +46,32 @@ class LowPassFilter(FrequencyFilter):
 
     def __init__(self, fs, cutoff=(20.0, 45.0), order=4, p=1.0):
         super().__init__(fs, cutoff, order, p)
+
+
+class FrequencyMask(Transform):
+    """Remove random frequency bands, shared across leads.
+
+    Args:
+        fs: sampling rate (Hz).
+        width: band width or (low, high) range in Hz.
+        n_masks: number of bands.
+        max_freq: highest frequency (Hz) a band may reach; defaults to fs / 2.
+    """
+
+    def __init__(self, fs, width=(1.0, 5.0), n_masks=1, max_freq=None, p=1.0):
+        super().__init__(p)
+        self.fs = fs
+        self.max_freq = fs / 2 if max_freq is None else max_freq
+        self.width = as_range(width, "width", low=0, high=self.max_freq)
+        self.n_masks = n_masks
+
+    def apply(self, x, generator=None):
+        b, _, t = x.shape
+        spectrum = torch.fft.rfft(x)
+        freqs = torch.fft.rfftfreq(t, d=1 / self.fs).to(x.device, x.dtype)
+        keep = torch.ones(b, 1, len(freqs), dtype=torch.bool, device=x.device)
+        for _ in range(self.n_masks):
+            width = uniform(self.width, (b, 1, 1), x, generator)
+            start = uniform((0, 1), (b, 1, 1), x, generator) * (self.max_freq - width)
+            keep &= (freqs < start) | (freqs >= start + width)
+        return torch.fft.irfft(spectrum * keep, n=t)

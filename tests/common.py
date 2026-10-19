@@ -33,4 +33,6 @@ TRANSFORMS = {
     "RecordedNoise": lambda: ea.RecordedNoise(NOISE),
     "RandomTimeWarp": lambda: ea.RandomTimeWarp(),
     "TimeShift": lambda: ea.TimeShift(FS, circular=False),
+    "FrequencyMask": lambda: ea.FrequencyMask(FS, n_masks=2),
+    "RandomResizedCrop": lambda: ea.RandomResizedCrop(2000),
 }
