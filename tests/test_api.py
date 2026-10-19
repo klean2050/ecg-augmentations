@@ -67,18 +67,15 @@ def test_return_mask(ecg):
     assert mask.all(dim=-1).sum() == 3
 
 
-def test_differentiable(ecg):
+def test_differentiable(transform, ecg):
     x = ecg.clone().requires_grad_()
-    aug = ea.Compose(
-        [
-            ea.GaussianNoise(),
-            ea.AmplitudeScale(),
-            ea.LowPassFilter(250),
-            ea.TimeStretch(),
-        ]
-    )
-    aug(x).sum().backward()
+    transform(x).sum().backward()
     assert torch.isfinite(x.grad).all() and x.grad.abs().sum() > 0
+
+
+def test_readme_quickstart():
+    readme = (Path(__file__).parents[1] / "README.md").read_text()
+    exec(readme.split("```python")[1].split("```")[0], {})
 
 
 def test_real_ecg_fixture():
