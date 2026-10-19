@@ -33,7 +33,7 @@ transforms = {
 def main(path="docs/images/augmentations.png"):
     lead = 1
     t = torch.arange(ecg.shape[-1]) / FS
-    fig, axes = plt.subplots(4, 3, figsize=(12, 10), sharex=True, facecolor=SURFACE)
+    fig, axes = plt.subplots(4, 3, figsize=(12, 7.5), sharex=True, facecolor=SURFACE)
     for ax, (name, transform) in zip(axes.flat, transforms.items()):
         y = transform(ecg, generator=torch.Generator().manual_seed(3))
         ax.plot(t, ecg[lead], color=ORIGINAL, lw=1.2)
