@@ -8,7 +8,7 @@ ECG signal augmentations for PyTorch, built for representation and self-supervis
 - Per-sample application probabilities and reproducible randomness through `torch.Generator`.
 - Only `numpy` and `torch` are required.
 
-![Lead II of a synthetic ECG before and after each augmentation](docs/images/augmentations.png)
+![Lead II of a synthetic ECG before and after representative augmentations](docs/images/augmentations.png)
 
 ## Installation
 
@@ -120,27 +120,6 @@ No augmentation is label-preserving for every task. Choose them by what your lab
 | `Permute`, circular `TimeShift`, `CutMix` | beats cut at boundaries | RR sequence altered | rhythm labels (AF, ectopy patterns) |
 | `RandomCrop` | preserved | preserved | record-level labels of intermittent events |
 | `TimeMask`, `PRMask`, `QRSMask`, `QTMask` | masked content removed | preserved | labels defined by the masked waves |
-
-## Development
-
-```
-pytest            # synthetic signals only, no downloads
-black .
-python examples/plot_augmentations.py
-```
-
-`ea.synthetic_ecg` returns a multi-lead ECG and its R-peak indices for tests and demos. It is not a physiological model.
-
-## Changes from 0.x
-
-Version 1.0 is a breaking release:
-
-- Transforms take `fs` instead of `sample_rate`.
-- `GaussianNoise` takes `snr_db`.
-- Filter defaults are ECG cutoffs.
-- `ratio` in the beat masks is now the probability of masking a beat.
-- `Scale`, `TimeWarp`, `RandWanderer`, `RandMask`, `HighLowPass`, `Pass` and `utils` are replaced by `AmplitudeScale`, `TimeStretch`, `BaselineWander`, `TimeMask`, `OneOf([HighPassFilter(...), LowPassFilter(...)])` and an empty `Compose([])`.
-- Batched input, NumPy input, GPU tensors and seeding are now supported by every transform.
 
 ## Citation
 
