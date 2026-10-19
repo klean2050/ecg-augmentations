@@ -142,7 +142,7 @@ def test_lead_mask(ecg):
 
 @pytest.mark.parametrize(
     "cls,window",
-    [(ea.PRMask, (0.2, 0)), (ea.QRSMask, (0.05, 0.05)), (ea.QTMask, (0.05, 0.33))],
+    [(ea.PRMask, (0.2, 0)), (ea.QRSMask, (0.05, 0.05)), (ea.QTMask, (0.05, 0.36))],
 )
 def test_beat_masks(ecg, cls, window):
     y = cls(FS, ratio=1.0, detector=detector)(ecg)
@@ -152,6 +152,17 @@ def test_beat_masks(ecg, cls, window):
     changed = (y != ecg).any(0)
     assert changed.any() and not changed[~allowed].any()
     assert torch.equal(cls(FS, ratio=0.0, detector=detector)(ecg), ecg)
+
+
+@pytest.mark.parametrize("bpm", [60, 120])
+def test_qt_mask_adapts_to_rate(bpm):
+    x, peaks = ea.synthetic_ecg(duration=10, fs=FS, heart_rate=bpm, hrv=0, seed=0)
+    detect = lambda signal, fs: peaks.numpy()
+    _, mask = ea.QTMask(FS, ratio=1.0, detector=detect, return_mask=True)(x)
+    r = int(peaks[3])
+    per_beat = mask[0, r - 20 : r + 100].sum()
+    expected = (0.05 + 0.33 * (60 / bpm) ** 0.5) * FS
+    assert abs(per_beat - expected) <= 2
 
 
 def test_hold_fill():

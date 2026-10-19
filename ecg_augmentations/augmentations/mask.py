@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 
 from ..base import Transform, as_range, randint, to_batched, uniform
@@ -101,6 +102,7 @@ class BeatMask(MaskTransform):
     """
 
     window = (0.0, 0.0)
+    rate_exponent = 0.0
 
     def __init__(
         self,
@@ -120,16 +122,25 @@ class BeatMask(MaskTransform):
         self.detector = detector or neurokit_peaks
         self.lead = lead
 
+    def windows(self, peaks):
+        """Per-beat (start, end) samples; the part after R scales with RR^rate_exponent."""
+        peaks = np.asarray(peaks, dtype=int)
+        rr = np.full(len(peaks), self.fs)
+        if len(peaks) > 1:
+            rr = np.diff(peaks, prepend=2 * peaks[0] - peaks[1])
+        after = self.window[1] * (rr / self.fs) ** self.rate_exponent
+        before = round(self.window[0] * self.fs)
+        return peaks - before, peaks + np.round(after * self.fs).astype(int)
+
     def make_mask(self, x, generator=None):
         b, _, t = x.shape
-        before, after = (round(w * self.fs) for w in self.window)
         mask = torch.zeros(b, 1, t, dtype=torch.bool, device=x.device)
         for i in range(b):
             peaks = self.detector(x[i, self.lead].detach().cpu().numpy(), self.fs)
             chosen = uniform((0, 1), len(peaks), x, generator) < self.ratio
-            for r, keep in zip(peaks, chosen.tolist()):
+            for start, end, keep in zip(*self.windows(peaks), chosen.tolist()):
                 if keep:
-                    mask[i, 0, max(int(r) - before, 0) : min(int(r) + after, t)] = True
+                    mask[i, 0, max(start, 0) : min(end, t)] = True
         return mask
 
 
@@ -146,6 +157,8 @@ class QRSMask(BeatMask):
 
 
 class QTMask(BeatMask):
-    """Mask from 0.05 s before to 0.33 s after each R peak (QRS, ST segment and T wave)."""
+    """Mask the QRS, ST segment and T wave: from 0.05 s before each R peak to 0.33 s
+    after it at 60 bpm, scaled with the preceding RR interval as sqrt(RR) (Bazett)."""
 
     window = (0.05, 0.33)
+    rate_exponent = 0.5
