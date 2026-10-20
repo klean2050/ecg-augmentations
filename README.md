@@ -8,10 +8,8 @@
 ECG signal augmentations for PyTorch, built for representation and self-supervised learning.
 
 - Realistic noise and artifacts, amplitude, filtering, temporal and masking transforms.
-- Parameters in physical units: seconds, Hz, and SNR in dB.
 - Single records, multi-lead records and batches, as PyTorch tensors or NumPy arrays, on CPU or GPU.
 - Per-sample application probabilities and reproducible randomness through `torch.Generator`.
-- Only `numpy` and `torch` are required.
 
 ![Lead II of a synthetic ECG before and after representative augmentations](docs/images/augmentations.png)
 
