@@ -113,11 +113,13 @@ def r_peaks(lead):
 @pytest.mark.parametrize("factor", [0.8, 1.25])
 def test_time_stretch(ecg, factor):
     assert torch.allclose(ea.TimeStretch(1.0)(ecg), ecg, atol=1e-6)
-    y = ea.TimeStretch(factor)(ecg)
-    rr = r_peaks(y[0]).diff().double().median()
-    assert abs(rr - factor * PEAKS.diff().double().median()) <= 2
-    flat = (y[0].diff() == 0).sum()
-    assert flat == 0 if factor > 1 else flat < 0.25 * ecg.shape[-1]
+    x, peaks = ea.synthetic_ecg(duration=10, fs=FS, n_leads=1, hrv=0, seed=0)
+    y = ea.TimeStretch(factor)(x)
+    rr = r_peaks(y[0]).diff().double()
+    assert torch.all((rr - factor * peaks.diff().double().mean()).abs() <= 2)
+    same = (y[0, 1:] == y[0, :-1]).int()
+    padding = same.cumprod(0).sum() + same.flip(0).cumprod(0).sum()
+    assert padding <= 1 if factor > 1 else 0 < padding < 0.25 * x.shape[-1]
 
 
 def test_time_stretch_window_is_random(ecg):

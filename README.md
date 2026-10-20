@@ -1,5 +1,10 @@
 # ECG Augmentations
 
+[![PyPI](https://img.shields.io/pypi/v/ecg-augmentations)](https://pypi.org/project/ecg-augmentations/)
+[![CI](https://github.com/klean2050/ecg-augmentations/actions/workflows/ci.yml/badge.svg)](https://github.com/klean2050/ecg-augmentations/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8053043.svg)](https://doi.org/10.5281/zenodo.8053043)
+
 ECG signal augmentations for PyTorch, built for representation and self-supervised learning.
 
 - Realistic noise and artifacts, amplitude, filtering, temporal and masking transforms.
