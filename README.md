@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/ecg-augmentations)](https://pypi.org/project/ecg-augmentations/)
 [![CI](https://github.com/klean2050/ecg-augmentations/actions/workflows/ci.yml/badge.svg)](https://github.com/klean2050/ecg-augmentations/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8053043.svg)](https://doi.org/10.5281/zenodo.8053043)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8053042.svg)](https://doi.org/10.5281/zenodo.8053042)
 
 ECG signal augmentations for PyTorch, built for representation and self-supervised learning.
 
@@ -127,12 +127,12 @@ No augmentation is label-preserving for every task. Choose them by what your lab
 ## Citation
 
 ```
-@software{avramidis_kleanthis_2023_8053043,
+@software{avramidis_kleanthis_2023_8053042,
     author = {Avramidis, Kleanthis},
     title = {ecg-augmentations},
     year = 2023,
     publisher = {Zenodo},
-    doi = {10.5281/zenodo.8053043},
-    url = {https://doi.org/10.5281/zenodo.8053043}
+    doi = {10.5281/zenodo.8053042},
+    url = {https://doi.org/10.5281/zenodo.8053042}
 }
 ```
